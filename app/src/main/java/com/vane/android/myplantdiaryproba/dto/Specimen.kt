@@ -7,7 +7,8 @@ data class Specimen(
     var description: String = "",
     var datePlanted: String = "",
     var specimenId: String = "",
-    var plantId: Int = 0
+    var plantId: Int = 0,
+    var events: ArrayList<Event> = ArrayList<Event>()
 ) {
 
     override fun toString(): String {
