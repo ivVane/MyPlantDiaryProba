@@ -119,6 +119,11 @@ class MainFragment : Fragment() {
     }
 
     private fun saveSpecimen() {
+        if (user == null) {
+            logon()
+        }
+        user ?: return
+
         var specimen = Specimen().apply {
             latitude = lblLatitudeValue.text.toString()
             longitude = lblLongitudeValue.text.toString()
@@ -128,7 +133,7 @@ class MainFragment : Fragment() {
             plantId = _plantId
         }
 
-        viewModel.save(specimen, photos)
+        viewModel.save(specimen, photos, user!!)
 
         // Clearing the local memory so we can create a brand new objects.
         specimen = Specimen()
