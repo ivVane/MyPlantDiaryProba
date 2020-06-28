@@ -20,7 +20,8 @@ class MainViewModel : ViewModel() {
     private lateinit var firestore: FirebaseFirestore
     private var _specimens: MutableLiveData<ArrayList<Specimen>> =
         MutableLiveData<ArrayList<Specimen>>()
-    private var storageReference  = FirebaseStorage.getInstance().getReference()
+    private var storageReference = FirebaseStorage.getInstance().getReference()
+    private var _specimen = Specimen()
 
     init {
         fetchPlants("e")
@@ -88,8 +89,8 @@ class MainViewModel : ViewModel() {
         val collection = firestore.collection("specimens")
             .document(specimen.specimenId)
             .collection("photos")
-        photos.forEach {
-            photo -> val task = collection.add(photo)
+        photos.forEach { photo ->
+            val task = collection.add(photo)
             task.addOnSuccessListener {
                 photo.id = it.id
                 uploadPhotos(specimen, photos, user)
@@ -97,9 +98,12 @@ class MainViewModel : ViewModel() {
         }
     }
 
-    private fun uploadPhotos(specimen: Specimen, photos: java.util.ArrayList<Photo>, user: FirebaseUser) {
-        photos.forEach {
-            photo ->
+    private fun uploadPhotos(
+        specimen: Specimen,
+        photos: java.util.ArrayList<Photo>,
+        user: FirebaseUser
+    ) {
+        photos.forEach { photo ->
             var uri = Uri.parse(photo.localUri)
             val imageRef = storageReference.child("images/" + user.uid + "/" + uri.lastPathSegment)
             val uploadTask = imageRef.putFile(uri)
@@ -139,5 +143,13 @@ class MainViewModel : ViewModel() {
         }
         set(value) {
             _specimens = value
+        }
+
+    internal var specimen: Specimen
+        get() {
+            return _specimen
+        }
+        set(value) {
+            _specimen = value
         }
 }
