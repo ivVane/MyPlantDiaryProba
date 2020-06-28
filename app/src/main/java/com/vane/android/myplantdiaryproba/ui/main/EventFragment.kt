@@ -16,7 +16,7 @@ class EventFragment : Fragment() {
         fun newInstance() = EventFragment()
     }
 
-    private lateinit var viewModel: EventViewModel
+    private lateinit var viewModel: MainViewModel
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -27,7 +27,7 @@ class EventFragment : Fragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        viewModel = ViewModelProviders.of(this).get(EventViewModel::class.java)
+        activity.let { viewModel = ViewModelProviders.of(it!!).get(MainViewModel::class.java) }
         btnSaveEvent.setOnClickListener {
             saveEvent()
         }
@@ -44,8 +44,7 @@ class EventFragment : Fragment() {
             units = actUnits.text.toString()
             date = edtEventDate.text.toString()
             description = edtDescription.text.toString()
-
         }
+        viewModel.specimen.events.add(event)
     }
-
 }

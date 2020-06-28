@@ -47,8 +47,9 @@ class MainFragment : Fragment() {
     private lateinit var currentPhotoPath: String
     private var _plantId = 0
     private var user: FirebaseUser? = null
-    private var photos : ArrayList<Photo> = ArrayList<Photo>()
-    private var photoURI : Uri? = null
+    private var photos: ArrayList<Photo> = ArrayList<Photo>()
+    private var photoURI: Uri? = null
+    private var specimen = Specimen()
 
     companion object {
         fun newInstance() = MainFragment()
@@ -63,7 +64,7 @@ class MainFragment : Fragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        viewModel = ViewModelProviders.of(this).get(MainViewModel::class.java)
+        activity.let { viewModel = ViewModelProviders.of(it!!).get(MainViewModel::class.java) }
         viewModel.plants.observe(this, Observer { plants ->
             actPlantName.setAdapter(
                 ArrayAdapter(
@@ -118,13 +119,29 @@ class MainFragment : Fragment() {
         )
     }
 
+    /**
+     * Persist our specimen to long term storage.
+     */
     private fun saveSpecimen() {
         if (user == null) {
             logon()
         }
         user ?: return
 
-        var specimen = Specimen().apply {
+        storeSpecimen()
+
+        viewModel.save(specimen, photos, user!!)
+
+        // Clearing the local memory so we can create a brand new objects.
+        specimen = Specimen()
+        photos = ArrayList<Photo>()
+    }
+
+    /**
+     * Populate a specimen object based on the details entered into the user interface.
+     */
+    internal fun storeSpecimen() {
+        specimen.apply {
             latitude = lblLatitudeValue.text.toString()
             longitude = lblLongitudeValue.text.toString()
             plantName = actPlantName.text.toString()
@@ -132,12 +149,7 @@ class MainFragment : Fragment() {
             datePlanted = txtDatePlanted.text.toString()
             plantId = _plantId
         }
-
-        viewModel.save(specimen, photos, user!!)
-
-        // Clearing the local memory so we can create a brand new objects.
-        specimen = Specimen()
-        photos = ArrayList<Photo>()
+        viewModel.specimen = specimen
     }
 
     private fun prepRequestLocationUpdates() {
