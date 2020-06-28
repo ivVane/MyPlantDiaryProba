@@ -2,11 +2,11 @@ package com.vane.android.myplantdiaryproba.ui.main
 
 import android.content.ContentValues.TAG
 import android.util.Log
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreSettings
+import com.vane.android.myplantdiaryproba.dto.Photo
 import com.vane.android.myplantdiaryproba.dto.Plant
 import com.vane.android.myplantdiaryproba.dto.Specimen
 import com.vane.android.myplantdiaryproba.service.PlantService
@@ -56,16 +56,34 @@ class MainViewModel : ViewModel() {
         _plants = plantService.fetchPlants(plantName)
     }
 
-    fun save(specimen: Specimen) {
+    fun save(
+        specimen: Specimen,
+        photos: ArrayList<Photo>
+    ) {
         val document = firestore.collection("specimens").document()
         specimen.specimenId = document.id
         val set = document.set(specimen)
 
         set.addOnSuccessListener {
             Log.d("Firebase", "Document saved")
+            if (photos != null && photos.size > 0) {
+                savePhotos(specimen, photos)
+            }
         }
         set.addOnFailureListener {
             Log.d("Firebase", "Save Failed")
+        }
+    }
+
+    private fun savePhotos(specimen: Specimen, photos: java.util.ArrayList<Photo>) {
+        val collection = firestore.collection("specimens")
+            .document(specimen.specimenId)
+            .collection("photos")
+        photos.forEach {
+            photo -> val task = collection.add(photo)
+            task.addOnSuccessListener {
+                photo.id = it.id
+            }
         }
     }
 

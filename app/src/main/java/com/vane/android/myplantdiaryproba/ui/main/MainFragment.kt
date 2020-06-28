@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.ImageDecoder
+import android.net.Uri
 import androidx.lifecycle.ViewModelProviders
 import android.os.Bundle
 import android.os.Environment
@@ -19,17 +20,18 @@ import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
 import com.firebase.ui.auth.AuthUI
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.vane.android.myplantdiaryproba.R
+import com.vane.android.myplantdiaryproba.dto.Photo
 import com.vane.android.myplantdiaryproba.dto.Plant
 import com.vane.android.myplantdiaryproba.dto.Specimen
 import kotlinx.android.synthetic.main.main_fragment.*
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.collections.ArrayList
 
 class MainFragment : Fragment() {
 
@@ -42,10 +44,11 @@ class MainFragment : Fragment() {
 
     private lateinit var viewModel: MainViewModel
     private lateinit var locationViewModel: LocationViewModel
-
     private lateinit var currentPhotoPath: String
     private var _plantId = 0
     private var user: FirebaseUser? = null
+    private var photos : ArrayList<Photo> = ArrayList<Photo>()
+    private var photoURI : Uri? = null
 
     companion object {
         fun newInstance() = MainFragment()
@@ -125,7 +128,11 @@ class MainFragment : Fragment() {
             plantId = _plantId
         }
 
-        viewModel.save(specimen)
+        viewModel.save(specimen, photos)
+
+        // Clearing the local memory so we can create a brand new objects.
+        specimen = Specimen()
+        photos = ArrayList<Photo>()
     }
 
     private fun prepRequestLocationUpdates() {
@@ -181,12 +188,12 @@ class MainFragment : Fragment() {
                 // If we are here, we have a valid intent.
                 val photoFile: File = createImageFile()
                 photoFile?.also {
-                    val photoURI = FileProvider.getUriForFile(
+                    photoURI = FileProvider.getUriForFile(
                         activity!!.applicationContext,
                         "com.vane.android.myplantdiaryproba.fileprovider",
                         it
                     )
-                    takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoFile)
+                    takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI)
                     startActivityForResult(takePictureIntent, SAVE_IMAGE_REQUEST_CODE)
                 }
             }
@@ -246,6 +253,8 @@ class MainFragment : Fragment() {
                 imgPlant.setImageBitmap(imageBitmap)
             } else if (requestCode == SAVE_IMAGE_REQUEST_CODE) {
                 Toast.makeText(context, "ImageSaved", Toast.LENGTH_LONG).show()
+                var photo = Photo(localUri = photoURI.toString())
+                photos.add(photo)
             } else if (requestCode == IMAGE_GALLERY_REQUEST_CODE) {
                 if (data != null && data.data != null) {
                     val image = data.data
