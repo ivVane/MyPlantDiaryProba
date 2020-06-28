@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "1018000420812-gpc2e02apqtltfnghm6gm1j8a0asjibf.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.vane.android.myplantdiaryproba",
+            "certificate_hash": "3ea48f4160c980caa7c1f5c6e28ed01ee50504de"
+          }
+        },
+        {
           "client_id": "1018000420812-ns19fac0o0g4lear90dcahevmikkut3e.apps.googleusercontent.com",
           "client_type": 3
         }

@@ -45,7 +45,7 @@ class MainFragment : Fragment() {
 
     private lateinit var currentPhotoPath: String
     private var _plantId = 0
-    private var user : FirebaseUser? = null
+    private var user: FirebaseUser? = null
 
     companion object {
         fun newInstance() = MainFragment()
@@ -101,9 +101,13 @@ class MainFragment : Fragment() {
         }
     }
 
+    /**
+     * Helper function that provides Logon into the app using Email and Google providers.
+     */
     private fun logon() {
         var providers = arrayListOf(
-            AuthUI.IdpConfig.EmailBuilder().build()
+            AuthUI.IdpConfig.EmailBuilder().build(),
+            AuthUI.IdpConfig.GoogleBuilder().build()
         )
         startActivityForResult(
             AuthUI.getInstance().createSignInIntentBuilder().setAvailableProviders(providers)
