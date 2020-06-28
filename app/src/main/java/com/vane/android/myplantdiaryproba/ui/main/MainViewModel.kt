@@ -1,11 +1,14 @@
 package com.vane.android.myplantdiaryproba.ui.main
 
 import android.content.ContentValues.TAG
+import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreSettings
+import com.google.firebase.storage.FirebaseStorage
 import com.vane.android.myplantdiaryproba.dto.Photo
 import com.vane.android.myplantdiaryproba.dto.Plant
 import com.vane.android.myplantdiaryproba.dto.Specimen
@@ -17,6 +20,7 @@ class MainViewModel : ViewModel() {
     private lateinit var firestore: FirebaseFirestore
     private var _specimens: MutableLiveData<ArrayList<Specimen>> =
         MutableLiveData<ArrayList<Specimen>>()
+    private var storageReference  = FirebaseStorage.getInstance().getReference()
 
     init {
         fetchPlants("e")
@@ -58,7 +62,8 @@ class MainViewModel : ViewModel() {
 
     fun save(
         specimen: Specimen,
-        photos: ArrayList<Photo>
+        photos: ArrayList<Photo>,
+        user: FirebaseUser
     ) {
         val document = firestore.collection("specimens").document()
         specimen.specimenId = document.id
@@ -67,7 +72,7 @@ class MainViewModel : ViewModel() {
         set.addOnSuccessListener {
             Log.d("Firebase", "Document saved")
             if (photos != null && photos.size > 0) {
-                savePhotos(specimen, photos)
+                savePhotos(specimen, photos, user)
             }
         }
         set.addOnFailureListener {
@@ -75,7 +80,11 @@ class MainViewModel : ViewModel() {
         }
     }
 
-    private fun savePhotos(specimen: Specimen, photos: java.util.ArrayList<Photo>) {
+    private fun savePhotos(
+        specimen: Specimen,
+        photos: java.util.ArrayList<Photo>,
+        user: FirebaseUser
+    ) {
         val collection = firestore.collection("specimens")
             .document(specimen.specimenId)
             .collection("photos")
@@ -83,8 +92,37 @@ class MainViewModel : ViewModel() {
             photo -> val task = collection.add(photo)
             task.addOnSuccessListener {
                 photo.id = it.id
+                uploadPhotos(specimen, photos, user)
             }
         }
+    }
+
+    private fun uploadPhotos(specimen: Specimen, photos: java.util.ArrayList<Photo>, user: FirebaseUser) {
+        photos.forEach {
+            photo ->
+            var uri = Uri.parse(photo.localUri)
+            val imageRef = storageReference.child("images/" + user.uid + "/" + uri.lastPathSegment)
+            val uploadTask = imageRef.putFile(uri)
+            uploadTask.addOnSuccessListener {
+                val downloadUrl = imageRef.downloadUrl
+                downloadUrl.addOnSuccessListener {
+                    photo.remoteUrl = it.toString()
+                    // Update our Cloud Firestore with the public image URI.
+                    updatePhotoDatabase(specimen, photo)
+                }
+            }
+            uploadTask.addOnFailureListener {
+                Log.e(TAG, it.message)
+            }
+        }
+    }
+
+    private fun updatePhotoDatabase(specimen: Specimen, photo: Photo) {
+        firestore.collection("specimens")
+            .document(specimen.specimenId)
+            .collection("photos")
+            .document(photo.id)
+            .set(photo)
     }
 
     internal var plants: MutableLiveData<ArrayList<Plant>>
