@@ -2,7 +2,6 @@ package com.vane.android.myplantdiaryproba.ui.main
 
 import androidx.lifecycle.ViewModelProviders
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -27,9 +26,15 @@ class EventFragment : DiaryFragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
+
         activity.let { viewModel = ViewModelProviders.of(it!!).get(MainViewModel::class.java) }
+
         btnSaveEvent.setOnClickListener {
             saveEvent()
+        }
+
+        btnTakeEventPhoto.setOnClickListener {
+            prepTakePhoto()
         }
     }
 
@@ -44,7 +49,20 @@ class EventFragment : DiaryFragment() {
             units = actUnits.text.toString()
             date = edtEventDate.text.toString()
             description = edtDescription.text.toString()
+            if (photoURI != null) {
+                event.localPhotoUri = photoURI.toString()
+            }
         }
         viewModel.specimen.events.add(event)
+        clearAll()
+    }
+
+    private fun clearAll() {
+        edtEventDate.setText("")
+        actEventType.setText("")
+        edtQuantity.setText("")
+        actUnits.setText("")
+        edtDescription.setText("")
+        photoURI = null
     }
 }
