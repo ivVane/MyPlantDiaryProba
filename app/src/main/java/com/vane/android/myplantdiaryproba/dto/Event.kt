@@ -5,6 +5,7 @@ data class Event(
     var date: String = "",
     var quantity: Double? = 0.0,
     var units: String = "",
-    var description: String = ""
+    var description: String = "",
+    var localPhotoUri: String? = null
 ) {
 }
