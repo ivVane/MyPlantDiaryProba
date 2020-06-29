@@ -10,7 +10,7 @@ import com.vane.android.myplantdiaryproba.R
 import com.vane.android.myplantdiaryproba.dto.Event
 import kotlinx.android.synthetic.main.event_fragment.*
 
-class EventFragment : Fragment() {
+class EventFragment : DiaryFragment() {
 
     companion object {
         fun newInstance() = EventFragment()
