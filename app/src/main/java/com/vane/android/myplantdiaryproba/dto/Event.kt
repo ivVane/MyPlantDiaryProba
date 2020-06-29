@@ -8,4 +8,9 @@ data class Event(
     var description: String = "",
     var localPhotoUri: String? = null
 ) {
+
+    override fun toString(): String {
+        return "$type $quantity $units $description"
+    }
+
 }
