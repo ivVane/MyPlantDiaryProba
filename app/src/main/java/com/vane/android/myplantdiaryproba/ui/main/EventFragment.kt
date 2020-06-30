@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.vane.android.myplantdiaryproba.MainActivity
 import com.vane.android.myplantdiaryproba.R
 import com.vane.android.myplantdiaryproba.dto.Event
 import kotlinx.android.synthetic.main.event_fragment.*
@@ -37,6 +38,10 @@ class EventFragment : DiaryFragment() {
 
         btnTakeEventPhoto.setOnClickListener {
             prepTakePhoto()
+        }
+
+        btnBackToSpecimen.setOnClickListener {
+            (activity as MainActivity).onSwipeRight()
         }
 
         // Wire up our recycler view.

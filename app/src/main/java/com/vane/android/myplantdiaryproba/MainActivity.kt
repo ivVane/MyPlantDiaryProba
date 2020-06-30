@@ -95,9 +95,9 @@ class MainActivity : AppCompatActivity() {
         Toast.makeText(this, "Top Swipe", Toast.LENGTH_LONG).show()
     }
 
-    private fun onLeftSwipe() {
+    internal fun onLeftSwipe() {
         if (activeFragment == mainFragment) {
-            mainFragment.storeSpecimen()
+            mainFragment.saveSpecimen()
             supportFragmentManager.beginTransaction()
                 .replace(R.id.container, eventFragment)
                 .commitNow()
@@ -105,7 +105,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun onSwipeRight() {
+    internal fun onSwipeRight() {
         if (activeFragment == eventFragment) {
             supportFragmentManager.beginTransaction()
                 .replace(R.id.container, mainFragment)
