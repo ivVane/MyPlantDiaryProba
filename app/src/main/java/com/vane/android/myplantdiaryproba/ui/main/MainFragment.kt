@@ -12,6 +12,7 @@ import android.provider.MediaStore
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.core.content.ContextCompat
@@ -96,6 +97,27 @@ class MainFragment : DiaryFragment() {
 
         btnForward.setOnClickListener {
             (activity as MainActivity).onLeftSwipe()
+        }
+
+        spn_specimens.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onNothingSelected(p0: AdapterView<*>?) {
+                TODO("Not yet implemented")
+            }
+
+            override fun onItemSelected(
+                parent: AdapterView<*>?,
+                view: View?,
+                position: Int,
+                id: Long
+            ) {
+                specimen = parent?.getItemAtPosition(position) as Specimen
+                // Use this specimen objects to populate the fields.
+                actPlantName.setText(specimen.plantName)
+                txtDescription.setText(specimen.description)
+                txtDatePlanted.setText(specimen.datePlanted)
+                viewModel.specimen = specimen
+            }
+
         }
     }
 
