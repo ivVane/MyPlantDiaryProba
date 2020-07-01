@@ -17,11 +17,14 @@ import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
+import androidx.recyclerview.widget.DefaultItemAnimator
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.firebase.ui.auth.AuthUI
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.vane.android.myplantdiaryproba.MainActivity
 import com.vane.android.myplantdiaryproba.R
+import com.vane.android.myplantdiaryproba.dto.Event
 import com.vane.android.myplantdiaryproba.dto.Photo
 import com.vane.android.myplantdiaryproba.dto.Plant
 import com.vane.android.myplantdiaryproba.dto.Specimen
@@ -41,6 +44,7 @@ class MainFragment : DiaryFragment() {
     private var user: FirebaseUser? = null
     private var photos: ArrayList<Photo> = ArrayList<Photo>()
     private var specimen = Specimen()
+    private var _events = ArrayList<Event>()
 
     companion object {
         fun newInstance() = MainFragment()
@@ -116,9 +120,24 @@ class MainFragment : DiaryFragment() {
                 txtDescription.setText(specimen.description)
                 txtDatePlanted.setText(specimen.datePlanted)
                 viewModel.specimen = specimen
+                // Trigger an update of the events for this specimen.
+                viewModel.fetchEvents()
             }
-
         }
+
+        rcy_eventsForSpecimens.hasFixedSize()
+        rcy_eventsForSpecimens.layoutManager = LinearLayoutManager(context)
+        rcy_eventsForSpecimens.itemAnimator = DefaultItemAnimator()
+        rcy_eventsForSpecimens.adapter = EventsAdapter(_events, R.layout.row_item)
+
+        viewModel.events.observe(this, Observer { events ->
+            // Remove everything that is in there.
+            _events.removeAll(_events)
+            // Update with the new events that we have observed.
+            _events.addAll(events)
+            // Tell the recyclerview to update.
+            rcy_eventsForSpecimens.adapter!!.notifyDataSetChanged()
+        })
     }
 
     /**
@@ -226,7 +245,6 @@ class MainFragment : DiaryFragment() {
             if (requestCode == CAMERA_REQUEST_CODE) {
                 // Now we can get the thumbnail
                 val imageBitmap = data!!.extras!!.get("data") as Bitmap
-                imgPlant.setImageBitmap(imageBitmap)
             } else if (requestCode == SAVE_IMAGE_REQUEST_CODE) {
                 Toast.makeText(context, "ImageSaved", Toast.LENGTH_LONG).show()
                 var photo = Photo(localUri = photoURI.toString())
@@ -236,7 +254,6 @@ class MainFragment : DiaryFragment() {
                     val image = data.data
                     val source = ImageDecoder.createSource(activity!!.contentResolver, image!!)
                     val bitmap = ImageDecoder.decodeBitmap(source)
-                    imgPlant.setImageBitmap(bitmap)
                 }
             } else if (requestCode == AUTH_REQUEST_CODE) {
                 user = FirebaseAuth.getInstance().currentUser
