@@ -1,12 +1,14 @@
 package com.vane.android.myplantdiaryproba.ui.main
 
 import android.Manifest
+import android.content.ContentValues
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.ImageDecoder
 import android.net.Uri
 import android.os.Environment
 import android.provider.MediaStore
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -21,6 +23,7 @@ import com.vane.android.myplantdiaryproba.R
 import com.vane.android.myplantdiaryproba.dto.Event
 import kotlinx.android.synthetic.main.row_item.view.*
 import java.io.File
+import java.lang.Exception
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -138,14 +141,18 @@ open class DiaryFragment : Fragment() {
         fun updateEvent(event: Event) {
             lblEventInfo.text = event.toString()
             if (event.localPhotoUri !== null && event.localPhotoUri != "null") {
-                // We have an image URI.
-                val source = ImageDecoder.createSource(
-                    activity!!.contentResolver,
-                    Uri.parse(event.localPhotoUri)
-                )
-                val bitmap = ImageDecoder.decodeBitmap(source)
-                // Take the image, and put it in the thumbnail of the row_item layout.
-                imgEventThumbnail.setImageBitmap(bitmap)
+                try {
+                    // We have an image URI.
+                    val source = ImageDecoder.createSource(
+                        activity!!.contentResolver,
+                        Uri.parse(event.localPhotoUri)
+                    )
+                    val bitmap = ImageDecoder.decodeBitmap(source)
+                    // Take the image, and put it in the thumbnail of the row_item layout
+                    imgEventThumbnail.setImageBitmap(bitmap)
+                } catch (e: Exception) {
+                    Log.e(ContentValues.TAG, "Unable to render bitmap: " + e.message)
+                }
             }
         }
     }
