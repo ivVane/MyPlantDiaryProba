@@ -39,7 +39,7 @@ class MainFragment : DiaryFragment() {
     private val AUTH_REQUEST_CODE = 2002
 
     private lateinit var viewModel: MainViewModel
-    private lateinit var locationViewModel: LocationViewModel
+    private lateinit var applicationViewModel: ApplicationViewModel
     private var _plantId = 0
     private var user: FirebaseUser? = null
     private var photos: ArrayList<Photo> = ArrayList<Photo>()
@@ -59,8 +59,10 @@ class MainFragment : DiaryFragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
+        applicationViewModel = ViewModelProviders.of(this).get(ApplicationViewModel::class.java)
         activity.let { viewModel = ViewModelProviders.of(it!!).get(MainViewModel::class.java) }
-        viewModel.plants.observe(this, Observer { plants ->
+
+        applicationViewModel.plantService.getLocalPlantDAO().getAllPlants().observe(this, Observer { plants ->
             actPlantName.setAdapter(
                 ArrayAdapter(
                     context!!,
@@ -201,8 +203,7 @@ class MainFragment : DiaryFragment() {
     }
 
     private fun requestLocationUpdates() {
-        locationViewModel = ViewModelProviders.of(this).get(LocationViewModel::class.java)
-        locationViewModel.getLocationLiveData().observe(this, Observer {
+        applicationViewModel.getLocationLiveData().observe(this, Observer {
             lblLatitudeValue.text = it.latitude
             lblLongitudeValue.text = it.longitude
         })

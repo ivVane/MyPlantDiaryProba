@@ -5,6 +5,7 @@ import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreSettings
@@ -14,6 +15,7 @@ import com.vane.android.myplantdiaryproba.dto.Photo
 import com.vane.android.myplantdiaryproba.dto.Plant
 import com.vane.android.myplantdiaryproba.dto.Specimen
 import com.vane.android.myplantdiaryproba.service.PlantService
+import kotlinx.coroutines.launch
 
 class MainViewModel : ViewModel() {
     private var _plants: MutableLiveData<ArrayList<Plant>> = MutableLiveData<ArrayList<Plant>>()
@@ -21,13 +23,11 @@ class MainViewModel : ViewModel() {
         MutableLiveData<ArrayList<Specimen>>()
     private var _events = MutableLiveData<List<Event>>()
 
-    private var plantService: PlantService = PlantService()
     private lateinit var firestore: FirebaseFirestore
     private var storageReference = FirebaseStorage.getInstance().getReference()
     private var _specimen = Specimen()
 
     init {
-        fetchPlants("e")
         firestore = FirebaseFirestore.getInstance()
         firestore.firestoreSettings = FirebaseFirestoreSettings.Builder().build()
         listenToSpecimens()
@@ -58,10 +58,6 @@ class MainViewModel : ViewModel() {
                 _specimens.value = allSpecimens
             }
         }
-    }
-
-    fun fetchPlants(plantName: String) {
-        _plants = plantService.fetchPlants(plantName)
     }
 
     fun save(

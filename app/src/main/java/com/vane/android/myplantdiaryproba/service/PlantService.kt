@@ -1,46 +1,47 @@
 package com.vane.android.myplantdiaryproba.service
 
-import androidx.lifecycle.MutableLiveData
+import android.app.Application
+import android.content.ContentValues.TAG
+import android.util.Log
+import androidx.room.Room
 import com.vane.android.myplantdiaryproba.RetrofitClientInstance
+import com.vane.android.myplantdiaryproba.dao.ILocalPlantDAO
 import com.vane.android.myplantdiaryproba.dao.IPlantDAO
+import com.vane.android.myplantdiaryproba.dao.PlantDatabase
 import com.vane.android.myplantdiaryproba.dto.Plant
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
+import kotlinx.coroutines.*
+import java.util.ArrayList
 
-class PlantService {
+class PlantService(application: Application) {
 
-    fun fetchPlants(plantName: String) : MutableLiveData<ArrayList<Plant>> {
-        var _plants = MutableLiveData<ArrayList<Plant>>()
-        val service = RetrofitClientInstance.retrofitInstance?.create(IPlantDAO::class.java)
-        val call = service?.getAllPlants()
-        call?.enqueue(object : Callback<ArrayList<Plant>> {
-            /**
-             * Invoked when a network exception occurred talking to the server or when an unexpected
-             * exception occurred creating the request or processing the response.
-             */
-            override fun onFailure(call: Call<ArrayList<Plant>>, t: Throwable) {
-                val j = 1 + 1
-                val i = 1 + 1
-            }
+    private val application = application
 
-            /**
-             * Invoked for a received HTTP response.
-             *
-             *
-             * Note: An HTTP response may still indicate an application-level failure such as a 404 or 500.
-             * Call [Response.isSuccessful] to determine if the response indicates success.
-             */
-            override fun onResponse(
-                call: Call<ArrayList<Plant>>,
-                response: Response<ArrayList<Plant>>
-            ) {
-                _plants.value = response.body()
-            }
+    internal suspend fun fetchPlants(plantName: String) {
+        withContext(Dispatchers.IO) {
+            val service = RetrofitClientInstance.retrofitInstance?.create(IPlantDAO::class.java)
+            val plants = async { service?.getAllPlants() }
 
-        })
-
-        return _plants
+            updateLocalPlants(plants.await())
+        }
     }
 
+    /**
+     * Store this plants locally, so that we can use the data without network latency.
+     */
+    private suspend fun updateLocalPlants(plants: ArrayList<Plant>?) {
+        var sizeOfPlants = plants?.size
+        try {
+            var localPlantDAO = getLocalPlantDAO()
+            localPlantDAO.insertAll(plants!!)
+        } catch (e: Exception) {
+            Log.e(TAG, e.message)
+        }
+
+    }
+
+    internal fun getLocalPlantDAO(): ILocalPlantDAO {
+        val db = Room.databaseBuilder(application, PlantDatabase::class.java, "diary").build()
+        val localPlantDao = db.localPlantDAO()
+        return localPlantDao
+    }
 }
