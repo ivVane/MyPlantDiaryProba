@@ -23,13 +23,11 @@ class MainViewModel : ViewModel() {
         MutableLiveData<ArrayList<Specimen>>()
     private var _events = MutableLiveData<List<Event>>()
 
-    private var _plantService: PlantService = PlantService()
     private lateinit var firestore: FirebaseFirestore
     private var storageReference = FirebaseStorage.getInstance().getReference()
     private var _specimen = Specimen()
 
     init {
-        fetchPlants("e")
         firestore = FirebaseFirestore.getInstance()
         firestore.firestoreSettings = FirebaseFirestoreSettings.Builder().build()
         listenToSpecimens()
@@ -59,12 +57,6 @@ class MainViewModel : ViewModel() {
                 }
                 _specimens.value = allSpecimens
             }
-        }
-    }
-
-    fun fetchPlants(plantName: String) {
-        viewModelScope.launch {
-            _plantService.fetchPlants(plantName)
         }
     }
 

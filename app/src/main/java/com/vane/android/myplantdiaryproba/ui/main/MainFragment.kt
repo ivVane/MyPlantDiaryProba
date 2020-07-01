@@ -59,8 +59,10 @@ class MainFragment : DiaryFragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
+        applicationViewModel = ViewModelProviders.of(this).get(ApplicationViewModel::class.java)
         activity.let { viewModel = ViewModelProviders.of(it!!).get(MainViewModel::class.java) }
-        viewModel.plants.observe(this, Observer { plants ->
+
+        applicationViewModel.plantService.getLocalPlantDAO().getAllPlants().observe(this, Observer { plants ->
             actPlantName.setAdapter(
                 ArrayAdapter(
                     context!!,
@@ -201,7 +203,6 @@ class MainFragment : DiaryFragment() {
     }
 
     private fun requestLocationUpdates() {
-        applicationViewModel = ViewModelProviders.of(this).get(ApplicationViewModel::class.java)
         applicationViewModel.getLocationLiveData().observe(this, Observer {
             lblLatitudeValue.text = it.latitude
             lblLongitudeValue.text = it.longitude
