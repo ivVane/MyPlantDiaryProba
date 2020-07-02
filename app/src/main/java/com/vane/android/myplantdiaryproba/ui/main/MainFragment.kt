@@ -23,6 +23,7 @@ import com.firebase.ui.auth.AuthUI
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.vane.android.myplantdiaryproba.MainActivity
+import com.vane.android.myplantdiaryproba.MapsActivity
 import com.vane.android.myplantdiaryproba.R
 import com.vane.android.myplantdiaryproba.dto.Event
 import com.vane.android.myplantdiaryproba.dto.Photo
@@ -85,6 +86,11 @@ class MainFragment : DiaryFragment() {
         actPlantName.setOnItemClickListener { parent, view, position, id ->
             var selectedPlant = parent.getItemAtPosition(position) as Plant
             _plantId = selectedPlant.planId
+        }
+
+        btnMap.setOnClickListener {
+            val intent = Intent(context, MapsActivity::class.java)
+            startActivity(intent)
         }
 
         btnTakePhoto.setOnClickListener {
