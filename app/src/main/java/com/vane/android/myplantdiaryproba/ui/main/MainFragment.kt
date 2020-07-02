@@ -63,15 +63,16 @@ class MainFragment : DiaryFragment() {
         applicationViewModel = ViewModelProviders.of(this).get(ApplicationViewModel::class.java)
         activity.let { viewModel = ViewModelProviders.of(it!!).get(MainViewModel::class.java) }
 
-        applicationViewModel.plantService.getLocalPlantDAO().getAllPlants().observe(this, Observer { plants ->
-            actPlantName.setAdapter(
-                ArrayAdapter(
-                    context!!,
-                    R.layout.support_simple_spinner_dropdown_item,
-                    plants
+        applicationViewModel.plantService.getLocalPlantDAO().getAllPlants()
+            .observe(this, Observer { plants ->
+                actPlantName.setAdapter(
+                    ArrayAdapter(
+                        context!!,
+                        R.layout.support_simple_spinner_dropdown_item,
+                        plants
+                    )
                 )
-            )
-        })
+            })
 
         viewModel.specimens.observe(this, Observer { specimens ->
             spn_specimens.setAdapter(
@@ -89,8 +90,7 @@ class MainFragment : DiaryFragment() {
         }
 
         btnMap.setOnClickListener {
-            val intent = Intent(context, MapsActivity::class.java)
-            startActivity(intent)
+            (activity as MainActivity).onOpenMap()
         }
 
         btnTakePhoto.setOnClickListener {
