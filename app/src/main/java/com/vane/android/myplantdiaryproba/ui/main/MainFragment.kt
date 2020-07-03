@@ -23,6 +23,7 @@ import com.firebase.ui.auth.AuthUI
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.vane.android.myplantdiaryproba.MainActivity
+import com.vane.android.myplantdiaryproba.MapsActivity
 import com.vane.android.myplantdiaryproba.R
 import com.vane.android.myplantdiaryproba.dto.Event
 import com.vane.android.myplantdiaryproba.dto.Photo
@@ -62,15 +63,16 @@ class MainFragment : DiaryFragment() {
         applicationViewModel = ViewModelProviders.of(this).get(ApplicationViewModel::class.java)
         activity.let { viewModel = ViewModelProviders.of(it!!).get(MainViewModel::class.java) }
 
-        applicationViewModel.plantService.getLocalPlantDAO().getAllPlants().observe(this, Observer { plants ->
-            actPlantName.setAdapter(
-                ArrayAdapter(
-                    context!!,
-                    R.layout.support_simple_spinner_dropdown_item,
-                    plants
+        applicationViewModel.plantService.getLocalPlantDAO().getAllPlants()
+            .observe(this, Observer { plants ->
+                actPlantName.setAdapter(
+                    ArrayAdapter(
+                        context!!,
+                        R.layout.support_simple_spinner_dropdown_item,
+                        plants
+                    )
                 )
-            )
-        })
+            })
 
         viewModel.specimens.observe(this, Observer { specimens ->
             spn_specimens.setAdapter(
@@ -85,6 +87,10 @@ class MainFragment : DiaryFragment() {
         actPlantName.setOnItemClickListener { parent, view, position, id ->
             var selectedPlant = parent.getItemAtPosition(position) as Plant
             _plantId = selectedPlant.planId
+        }
+
+        btnMap.setOnClickListener {
+            (activity as MainActivity).onOpenMap()
         }
 
         btnTakePhoto.setOnClickListener {

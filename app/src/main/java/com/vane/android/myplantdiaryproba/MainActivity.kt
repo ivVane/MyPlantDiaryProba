@@ -1,5 +1,7 @@
 package com.vane.android.myplantdiaryproba
 
+import android.content.Intent
+import android.content.IntentFilter
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.GestureDetector
@@ -8,6 +10,7 @@ import android.widget.Toast
 import androidx.core.view.GestureDetectorCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
+import com.vane.android.myplantdiaryproba.ui.main.DiaryMapFragment
 import com.vane.android.myplantdiaryproba.ui.main.EventFragment
 import com.vane.android.myplantdiaryproba.ui.main.MainFragment
 import com.vane.android.myplantdiaryproba.ui.main.MainViewModel
@@ -32,6 +35,13 @@ class MainActivity : AppCompatActivity() {
             activeFragment = mainFragment
         }
         detector = GestureDetectorCompat(this, DiaryGestureListener())
+
+        // Registering NotificationReceiver in MainActivity.
+        val notificationReceiver = NotificationReceiver()
+        val filter = IntentFilter()
+        filter.addAction(Intent.ACTION_POWER_CONNECTED)
+        filter.addAction(Intent.ACTION_POWER_DISCONNECTED)
+        this.registerReceiver(notificationReceiver, filter)
     }
 
     override fun onTouchEvent(event: MotionEvent?): Boolean {
@@ -112,5 +122,11 @@ class MainActivity : AppCompatActivity() {
                 .commitNow()
             activeFragment = mainFragment
         }
+    }
+
+    internal fun onOpenMap() {
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.container, DiaryMapFragment())
+            .commitNow()
     }
 }
