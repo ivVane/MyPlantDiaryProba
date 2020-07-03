@@ -1,5 +1,7 @@
 package com.vane.android.myplantdiaryproba
 
+import android.content.Intent
+import android.content.IntentFilter
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.GestureDetector
@@ -33,6 +35,13 @@ class MainActivity : AppCompatActivity() {
             activeFragment = mainFragment
         }
         detector = GestureDetectorCompat(this, DiaryGestureListener())
+
+        // Registering NotificationReceiver in MainActivity.
+        val notificationReceiver = NotificationReceiver()
+        val filter = IntentFilter()
+        filter.addAction(Intent.ACTION_POWER_CONNECTED)
+        filter.addAction(Intent.ACTION_POWER_DISCONNECTED)
+        this.registerReceiver(notificationReceiver, filter)
     }
 
     override fun onTouchEvent(event: MotionEvent?): Boolean {
